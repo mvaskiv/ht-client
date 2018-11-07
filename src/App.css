@@ -275,11 +275,6 @@ p.expand-today:hover, p.expand-today:hover > .expand-list-icon {
   direction: rtl;
 }
 
-.tasks-list:hover {
-  /* box-shadow: 0 0px 2px #dedede; */
-  /* transition: all 350ms ease; */
-}
-
 .tasks-list::-webkit-scrollbar {
   width: 2.5px;
 }
@@ -583,9 +578,16 @@ p.tags-place {
 }
 
 .notes-header {
-  position: absolute;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: row;
   top: 0;
-  left: 0;
+  padding-left: 45px;
+  /* left: 0; */
+  max-width: 1280px;
+  /* min-height: 70px; */
   height: 70px;
   width: 100%;
 }
@@ -596,13 +598,26 @@ p.tags-place {
   font-size: 40px;
   padding-top: 20px;
   margin: 0;
+  /* margin-right: 0px; */
   color: #ddd;
+  transition: all 125ms ease-in-out;
+}
+.notes-header h2 {
+  text-align: left;
+  padding: 4px;
+  padding-left: 15px;
+  line-height: 65px;
+  font-size: 20px;
+  padding-top: 20px;
+  font-weight: 400;
+  margin: 0;
+  color: #ccc;
   transition: all 125ms ease-in-out;
 }
 
 .notes-list {
-  position: absolute;
-  top: 72px;
+  position: relative;
+  top: 2px;
   left: 0;
   width: 100%;
   height: calc(100vh - 121px);
@@ -611,6 +626,7 @@ p.tags-place {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: center;
   /* align-content: center; */
   /* background-color: #aaa; */
 }
@@ -628,8 +644,9 @@ p.tags-place {
   position: relative;
   margin: 10px;
   height: auto;
-  width: 235px;
-  min-width: 205px;
+  max-height: 400px;
+  /* width: 235px; */
+  min-width: 240px;
   max-width: 275px;
   padding: 0px;
   flex-direction: row;
@@ -722,7 +739,7 @@ p.tags-place {
 }
 
 .note-view-item {
-    /* display: flex; */
+    display: flex;
     flex-grow: 1;
     position: fixed;
     top: 90px;
@@ -837,25 +854,40 @@ p.tags-place {
 
 .note-view-item .mov-preview {
   display: block;
-  position: absolute;
-  top: 350px;
+  float: left;
+  /* position: absolute; */
+  top: 0px;
   width: calc(100% - 20px);
   height: auto;
-  max-height: 50vh;
+  max-height: 100vh;
   overflow: visible;
 }
 
 .note-view-item .mov-play {
   display: block;
   position: absolute;
-  top: 365px;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
   width: 80px;
   /* left: 0; */
-  right: 25px;
-  /* margin: auto; */
+  /* right: 25px; */
+  margin: auto;
   height: auto;
-  max-height: 50vh;
   overflow: visible;
+}
+
+.mov-prev-cnt {
+  /* display: inline-table; */
+  position: absolute;
+  top: 350px;
+  left: 0;
+  padding: 0!important;
+  padding-left: 10px!important;
+  margin: 0!important;
+  width: 100%;
+  height: auto;
 }
 
 
@@ -870,6 +902,16 @@ p.tags-place {
   margin: auto;
   top: 350px;
   z-index: 99;
+}
+
+.viewer-info {
+  /* display: inline-flex; */
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1280px;
+  overflow: hidden;
 }
 
 /* .note-view-item {
@@ -892,7 +934,7 @@ p.tags-place {
 
 .icon-back {
   position: absolute;
-  left: -10px;
+  left: 5px;
   fill: #ddd;
   top: 14px;
   width: 62px;
@@ -901,11 +943,11 @@ p.tags-place {
 
 .notes-search {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   width: 200px;
   min-width: 200px;
   max-width: 400px;
-  right: 12px;
+  right: 55px;
   border-radius: 15px;
   border: 1px solid #555;
   padding: 7px;
@@ -923,10 +965,26 @@ p.tags-place {
 }
 
 .hypo-loader {
-  border: 1px solid #282c34;
+  /* border: 1px solid #282c34; */
   animation-iteration-count: infinite;
   animation-duration: 650ms;
   animation-name: bounce;
+}
+
+.hypo-menu {
+  position: absolute;
+  left: 10px;
+  top: 25px;
+  height: 40px;
+  animation-iteration-count: 1;
+  animation-duration: 1050ms;
+  animation-name: slide-down;
+  transition: 200ms;
+}
+
+@keyframes slide-down {
+  from {transform: translateY(-100px)}
+  to {transform: translateY(0px)}
 }
 
 @keyframes bounce {

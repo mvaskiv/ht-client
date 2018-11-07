@@ -21,7 +21,7 @@ const Poster = (props) => {
           <img className='mov-play' src={require('../resources/img/play.png')} alt='' />
           <p className='note-item-origin'>{props.details.synopsis}</p>
           <p className='note-item-header'>{props.details.title}</p>
-          <p className='note-item-text'>{props.details.genres.map((g,i) => {if (!props.details.genres[i+1]){return g} else {return g+', '}})}</p>
+          <p className='note-item-text'>{props.details.genres[0] && props.details.genres.map((g,i) => {if (!props.details.genres[i+1]){return g} else {return g+', '}})}</p>
       </div>
     )
   } else {
@@ -29,35 +29,25 @@ const Poster = (props) => {
   } 
 }
 
-class NewNote extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      header: '',
-      text: '',
-      _id: this.props._id
-    }
-  }
+const top_sort = [
+  {
+    'v': 'Top Rated',
+    's': 'rating'
+  },
+  {
+    'v': 'Recents',
+    's': 'date_added'
+  },
+  {
+    'v': 'Most Liked',
+    's': 'like_count'
+  },
+  // {
+  //   'v': 'Most Viewed',
+  //   's': 'download_count'
+  // }
+]
 
-  _onChange = (e) => {
-    this.setState({[e.target.name]: e.target.value})
-  }
-
-  render() {
-    return (
-      <div
-          className='note-view-item'>
-          <input type='text' className='note-item-header input'
-            value={this.state.header} placeholder='Caption'
-            onChange={this._onChange} name='header' />
-          <textarea className='note-item-text input'
-            value={this.state.text} placeholder='Note body'
-            onChange={this._onChange} name='text' />
-      </div>
-    )
-  }
-}
-  
 export default class Browser extends Component {
     constructor() {
       super();
@@ -67,6 +57,8 @@ export default class Browser extends Component {
         search: '',
         new: false,
         loaded: false,
+        sort_v: 'hypotube',
+        sort: 'rating'
       }
       this._bootsrapAsync();
     }
@@ -77,7 +69,8 @@ export default class Browser extends Component {
     }
   
     _getUpdate = async () => {
-      fetch('http://localhost:8000/movies/1', {
+      let sort = await this.state.sort;
+      fetch('http://localhost:8000/movies/'+sort+'/1', {
         method: 'GET',
         Accept: 'application/json',
       })
@@ -111,6 +104,7 @@ export default class Browser extends Component {
     return (
       <div className='notes-cnt'>
         <div className='notes-header'>
+          <img src={require('../resources/img/Hypo.png')} alt='' className='hypo-menu' style={{left: this.state.view >= 0 ? -42+'px' : 10+'px'}} />
           <svg
           onClick={() => this.setState({view: -1})}
           className='icon-back'
@@ -125,7 +119,13 @@ export default class Browser extends Component {
           xmlSpace="preserve"><g>
           <path d="M60.9,29.6c-0.8-0.8-2-0.8-2.8,0l-19,19c-0.8,0.8-0.8,2,0,2.8l19,19c0.4,0.4,0.9,0.6,1.4,0.6s1-0.2,1.4-0.6   c0.8-0.8,0.8-2,0-2.8L43.3,50l17.6-17.6C61.7,31.6,61.7,30.4,60.9,29.6z"/>
           </g></svg>
-          <h1 style={{paddingLeft: this.state.view >= 0 ? '40px' : '15px'}}>{this.state.view >= 0 ? 'Back': 'Top Rated'}</h1>
+          <h1 style={{paddingLeft: '15px'}}>{this.state.view >= 0 ? 'Back': this.state.sort_v}</h1>
+          {top_sort.map((s,i) => {
+            if (s.v !== this.state.sort_v) return <h2 key={ i } onClick={() => this.setState({sort: s.s, sort_v: s.v, dataSource: []}, () => this._getUpdate())} >{ s.v }</h2>
+          })}
+          {/* <h2>Recents</h2>
+          <h2>Most Liked</h2>
+          <h2>Most Viewed</h2> */}
           <input className='notes-search' onChange={this._onChange} value={ this.state.search } type='search' placeholder='Search' />
         </div>
          {this.state.view >= 0 && <Viewer details={this.state.dataSource[this.state.view]} />}
@@ -154,24 +154,31 @@ class Viewer extends Component {
     console.log(this.props)
   }
 
+  // componentWillUnmount() {
+  //   fetch('http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/done', {
+  //       method: 'GET'
+  //     })
+  // }
+
   render() {
     const poster = 'https://cors-anywhere.herokuapp.com/' + this.props.details.medium_cover_image
     return (
-      <div>
-        <div
-          // style={{backgroundImage: `url(${props.details.medium_cover_image})`}}
-            className={'note-view-item'}
-            >
+     
+        <div className={'note-view-item'}>
+             <div className='viewer-info'>
             {/* <div className='blur' style={{backgroundImage: `url(${props.details.medium_cover_image})`}} /> */}
             <img src={poster} className='img-poster' alt=''/>
             <div>
-              {this.state.watch && <video 
+              {this.state.watch && <video
+                ref={r => this.player = r}
                 className='video-player'
-                controls 
+                controls
+                controlsList="nodownload"
+                on
                 autoPlay
                 src={'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug} />}
               {!this.state.watch &&
-                <div>
+                <div className='mov-prev-cnt'>
                   <img className='mov-preview' src={this.props.details.background_image} alt='' />
                   <img onClick={() => this.setState({watch: true})} className='mov-play' src={require('../resources/img/play.png')} alt='' />
                 </div>
