@@ -6,8 +6,10 @@ const db = new PouchDB('mydb-desktop')
 
 const Poster = (props) => {
   let search = new RegExp(props.search, 'i');  
-  const poster = 'https://cors-anywhere.herokuapp.com/' + props.details.medium_cover_image
-
+  // const poster = 'https://cors-anywhere.herokuapp.com/' + props.details.medium_cover_image
+  const poster = '/posters/' + props.details.slug + '.jpg'
+  // console.log(poster)
+  
   if (!props.search || (props.search
       && (props.details.title.match(search)))) {
     return (
@@ -17,9 +19,9 @@ const Poster = (props) => {
           onClick={() => props._view(props.num)}>
           {/* <div className='blur' style={{backgroundImage: `url(${props.details.medium_cover_image})`}} /> */}
           <img src={poster} className='img-poster' alt=''/>
-          <img className='mov-preview' src={props.details.background_image} alt='' />
-          <img className='mov-play' src={require('../resources/img/play.png')} alt='' />
-          <p className='note-item-origin'>{props.details.synopsis}</p>
+          {/* <img className='mov-preview' src={props.details.background_image} alt='' /> */}
+          {/* <img className='mov-play' src={require('../resources/img/play.png')} alt='' /> */}
+          {/* <p className='note-item-origin'>{props.details.synopsis}</p> */}
           <p className='note-item-header'>{props.details.title}</p>
           <p className='note-item-text'>{props.details.genres[0] && props.details.genres.map((g,i) => {if (!props.details.genres[i+1]){return g} else {return g+', '}})}</p>
       </div>
@@ -70,7 +72,7 @@ export default class Browser extends Component {
   
     _getUpdate = async () => {
       let sort = await this.state.sort;
-      fetch('http://localhost:8000/movies/'+sort+'/1', {
+      fetch('/movies/'+sort+'/1', {
         method: 'GET',
         Accept: 'application/json',
       })
