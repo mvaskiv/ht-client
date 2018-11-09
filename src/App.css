@@ -42,7 +42,7 @@
   top: 0px;
   height: 22px;
   /* background-color: #eaeaea; */
-  background-color: #080808;
+  background-color: #181818;
   width: 100vw;
   z-index: 99;
 }
@@ -586,7 +586,7 @@ p.tags-place {
   top: 0;
   padding-left: 45px;
   /* left: 0; */
-  max-width: 1280px;
+  /* max-width: 1280px; */
   /* min-height: 70px; */
   height: 70px;
   width: 100%;
@@ -705,7 +705,7 @@ p.tags-place {
   padding-bottom: 5px;
   text-align: left;
   padding-left: 7px;
-  width: 90%;
+  width: 80%;
   font-size: 16px;
   font-weight: 700;
   color: #ddd;
@@ -724,7 +724,7 @@ p.tags-place {
   padding-left: 5px;
   margin-top: 0px;
   margin-left: 2px;
-  max-width: calc(100% - 20px);
+  width: 95%;
   font-size: 14px;
   font-weight: 200;
   color: #aaa;
@@ -732,6 +732,16 @@ p.tags-place {
   white-space: nowrap;
   text-overflow: ellipsis;
   transition: all 100ms linear;
+}
+.movie-list-year {
+  position: absolute;
+  right: 1px;
+  bottom: -37px;
+  line-height: 12px;
+  font-size: 13px;
+  font-weight: 200;
+  color: #aaa;
+  
 }
 
 .note-item-origin {
@@ -759,6 +769,7 @@ p.tags-place {
     z-index: 1001;
     /* border-bottom: 1px solid #dadada; */
     overflow: hidden;
+    overflow-y: scroll;
     /* transition: all 200ms ease-in-out; */
 }
 
@@ -788,12 +799,12 @@ p.tags-place {
 
 .note-view-item .note-item-text {
   position: absolute;
-  top: 300px;
+  top: 265px;
   left: 250px;
   height: 15px;
   text-align: left;
   direction: ltr;
-  line-height: 15px;
+  line-height: 11px;
   margin: 0;
   padding: 0px;
   max-width: 512px;
@@ -816,7 +827,7 @@ p.tags-place {
   overflow-x: hidden;
   overflow-y: scroll;
   text-overflow: ellipsis;
-  max-height: 250px;
+  max-height: 218px;
   max-width: 512px;
   margin: auto;
   text-align: left;
@@ -846,6 +857,26 @@ p.tags-place {
   color: #dadada;
   padding-right: 50px!important;
   /* background: rgba(240,244,252,0.95); */
+}
+
+.movie-runtime {
+  position: absolute;
+  top: 270px;
+  line-height: 15px;
+  left: 250px;
+  font-size: 15px;
+  font-weight: 200;
+  color: #777;
+}
+
+.movie-rating {
+  position: absolute;
+  top: 290px;
+  line-height: 15px;
+  left: 250px;
+  font-size: 15px;
+  font-weight: 200;
+  color: #777;
 }
 
 .mov-preview, .mov-play {
@@ -888,7 +919,10 @@ p.tags-place {
   margin: 0!important;
   width: 100%;
   height: auto;
+  /* max-height: calc(100% - 430px) */
 }
+
+
 
 
 
@@ -910,7 +944,11 @@ p.tags-place {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
+
   max-width: 1280px;
+  height: auto;
+  min-height: 1200px;
+  
   overflow: hidden;
 }
 
@@ -947,7 +985,7 @@ p.tags-place {
   width: 200px;
   min-width: 200px;
   max-width: 400px;
-  right: 55px;
+  right: 70px;
   border-radius: 15px;
   border: 1px solid #555;
   padding: 7px;

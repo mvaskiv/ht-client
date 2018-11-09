@@ -4,31 +4,46 @@ import PouchDB from 'pouchdb';
 import { request } from 'https';
 const db = new PouchDB('mydb-desktop')
 
-const Poster = (props) => {
-  let search = new RegExp(props.search, 'i');  
-  // const poster = 'https://cors-anywhere.herokuapp.com/' + props.details.medium_cover_image
-  const poster = '/posters/' + props.details.slug + '.jpg'
-  // console.log(poster)
-  
-  if (!props.search || (props.search
-      && (props.details.title.match(search)))) {
-    return (
-      <div
-        // style={{backgroundImage: `url(${props.details.medium_cover_image})`}}
-          className={props.view === props.details.id ? 'note-view-item' : 'note-list-item'}
-          onClick={() => props._view(props.num)}>
-          {/* <div className='blur' style={{backgroundImage: `url(${props.details.medium_cover_image})`}} /> */}
-          <img src={poster} className='img-poster' alt=''/>
-          {/* <img className='mov-preview' src={props.details.background_image} alt='' /> */}
-          {/* <img className='mov-play' src={require('../resources/img/play.png')} alt='' /> */}
-          {/* <p className='note-item-origin'>{props.details.synopsis}</p> */}
-          <p className='note-item-header'>{props.details.title}</p>
-          <p className='note-item-text'>{props.details.genres[0] && props.details.genres.map((g,i) => {if (!props.details.genres[i+1]){return g} else {return g+', '}})}</p>
-      </div>
-    )
-  } else {
-    return null
-  } 
+class Poster extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: 1
+    }
+    this._loader()
+  }
+
+  _loader = () => {
+    if (this.state.loading) setTimeout(this._loader, 250)
+    else this.forceUpdate();
+  }
+
+  render() {
+    const props = this.props;
+
+    let search = new RegExp(props.search, 'i');
+    let loaded = 1;
+    const poster = '/posters/' + props.details.slug + '.jpg'
+    if (!props.search || (props.search
+        && (props.details.title.match(search)))) {
+      if (this.state.loading === 1) {
+        return <img src={poster} style={{display: 'none'}} alt='' onLoad={() => this.setState({loading: 0})}/>
+      } else {
+        return (
+          <div
+              className='note-list-item'
+              onClick={() => props._view(props.num)}>
+              <img src={poster} className='img-poster' alt=''/>
+              <p className='note-item-header'>{props.details.title}</p>
+              <p className='movie-list-year'>{props.details.year}</p>
+              <p className='note-item-text'>{props.details.genres[0] && props.details.genres.map((g,i) => {if (!props.details.genres[i+1]){return g} else {return g+', '}})}</p>
+          </div>
+        )
+      }
+    } else {
+      return null
+    } 
+  }
 }
 
 const top_sort = [
@@ -125,9 +140,6 @@ export default class Browser extends Component {
           {top_sort.map((s,i) => {
             if (s.v !== this.state.sort_v) return <h2 key={ i } onClick={() => this.setState({sort: s.s, sort_v: s.v, dataSource: []}, () => this._getUpdate())} >{ s.v }</h2>
           })}
-          {/* <h2>Recents</h2>
-          <h2>Most Liked</h2>
-          <h2>Most Viewed</h2> */}
           <input className='notes-search' onChange={this._onChange} value={ this.state.search } type='search' placeholder='Search' />
         </div>
          {this.state.view >= 0 && <Viewer details={this.state.dataSource[this.state.view]} />}
@@ -163,32 +175,36 @@ class Viewer extends Component {
   // }
 
   render() {
-    const poster = 'https://cors-anywhere.herokuapp.com/' + this.props.details.medium_cover_image
+    // const poster = 'https://cors-anywhere.herokuapp.com/' + this.props.details.medium_cover_image
     return (
      
         <div className={'note-view-item'}>
-             <div className='viewer-info'>
+          <div className='viewer-info'>
             {/* <div className='blur' style={{backgroundImage: `url(${props.details.medium_cover_image})`}} /> */}
-            <img src={poster} className='img-poster' alt=''/>
+            <img src={'/posters/' + this.props.details.slug + '.jpg'} className='img-poster' alt=''/>
             <div>
-              {this.state.watch && <video
+              {this.state.watch && 
+              <video
                 ref={r => this.player = r}
                 className='video-player'
                 controls
                 controlsList="nodownload"
+                poster={'/covers/' + this.props.details.slug + '.jpg'}
                 on
-                autoPlay
-                src={'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug} />}
+                src={'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug} />
+              }
               {!this.state.watch &&
                 <div className='mov-prev-cnt'>
-                  <img className='mov-preview' src={this.props.details.background_image} alt='' />
+                  <img className='mov-preview' src={'/covers/' + this.props.details.slug + '.jpg'} alt='' />
                   <img onClick={() => this.setState({watch: true})} className='mov-play' src={require('../resources/img/play.png')} alt='' />
                 </div>
               }
             </div>
             
             <p className='note-item-origin'>{this.props.details.synopsis}</p>
-            <p className='note-item-header'>{this.props.details.title}</p>
+            <p className='note-item-header'>{this.props.details.title} <i style={{fontWeight: '100', fontSize: 16+'px', opacity: 0.7}}>({this.props.details.year})</i></p>
+            <p className='movie-runtime'>Runtime: {this.props.details.runtime}m</p>
+            <p className='movie-rating'>Rating: {this.props.details.rating}</p>
             <p className='note-item-text'>{this.props.details.genres.map((g,i) => {if (!this.props.details.genres[i+1]){return g} else {return g+', '}})}</p>
         </div>
       </div>
