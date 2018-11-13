@@ -1,50 +1,13 @@
 import React, { Component } from 'react';
 import { PreLoader } from '../constants/loader';
+import Viewer from './Viewer';
+import Pages from '../reusable/pages';
+import Poster from '../constants/Poster';
 import PouchDB from 'pouchdb';
-import { request } from 'https';
+import PouchFind from 'pouchdb-find';
+import { IconBack } from '../constants/svg';
+PouchDB.plugin(PouchFind);
 const db = new PouchDB('mydb-desktop')
-
-class Poster extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      loading: 1
-    }
-    this._loader()
-  }
-
-  _loader = () => {
-    if (this.state.loading) setTimeout(this._loader, 250)
-    else this.forceUpdate();
-  }
-
-  render() {
-    const props = this.props;
-
-    let search = new RegExp(props.search, 'i');
-    let loaded = 1;
-    const poster = '/posters/' + props.details.slug + '.jpg'
-    if (!props.search || (props.search
-        && (props.details.title.match(search)))) {
-      if (this.state.loading === 1) {
-        return <img src={poster} style={{display: 'none'}} alt='' onLoad={() => this.setState({loading: 0})}/>
-      } else {
-        return (
-          <div
-              className='note-list-item'
-              onClick={() => props._view(props.num)}>
-              <img src={poster} className='img-poster' alt=''/>
-              <p className='note-item-header'>{props.details.title}</p>
-              <p className='movie-list-year'>{props.details.year}</p>
-              <p className='note-item-text'>{props.details.genres[0] && props.details.genres.map((g,i) => {if (!props.details.genres[i+1]){return g} else {return g+', '}})}</p>
-          </div>
-        )
-      }
-    } else {
-      return null
-    } 
-  }
-}
 
 const top_sort = [
   {
@@ -59,10 +22,6 @@ const top_sort = [
     'v': 'Most Liked',
     's': 'like_count'
   },
-  // {
-  //   'v': 'Most Viewed',
-  //   's': 'download_count'
-  // }
 ]
 
 export default class Browser extends Component {
@@ -75,34 +34,143 @@ export default class Browser extends Component {
         new: false,
         loaded: false,
         sort_v: 'hypotube',
-        sort: 'rating'
+        sort: 'rating',
+        page: 1,
+        context: false,
       }
       this._bootsrapAsync();
     }
 
+
+    componentDidMount() {
+      document.addEventListener('contextmenu', this._handleContextMenu);
+      document.addEventListener('click', this._handleClick);
+    }
+
+    _handleClick = (e) => {
+      if (e.target !== this.context) {
+        this.setState({context: false});
+      }
+    }
+
+    _handleContextMenu = async (e) => {
+      await e.preventDefault()
+      // console.log(e.target.className)
+      if (typeof e.target.className === 'string' && e.target.className.match(/(movie-list-ol)|(note-list-item)/)) {
+        const left = window.innerHeight - e.clientX > 190 ? e.clientX + 5 : e.clientX - 175;
+        const top = (e.clientY - this.tasks.offsetTop) + this.tasks.scrollTop;
+        this.setState({context: {x: top, y: left}});
+        
+      }
+    }
+
     _bootsrapAsync = async () => {
-      await this._getUpdate();
+      // await this._getUpdate();
+      let id = await this.state.page + this.state.sort
+      await this._localUpdate(id);
       this.setState({uuid: localStorage.getItem('uuid')});
     }
   
-    _getUpdate = async () => {
+
+    _getLocal = () => {
+      let selector = {
+        'page': this.state.page,
+        'sort': this.state.sort,
+      }
+      db.createIndex({
+        index: {fields: ['page']},
+      })
+      db.find({
+        selector: selector,
+        sort: ['_id'],
+      }).then((res) => {
+        console.log(res.docs)
+        // this.setState({ dataSource: res.docs }, () => {
+        //   this.setState({loaded: true}, () => this.forceUpdate())
+        // })
+      });
+    }
+
+    _localUpdate = (id) => {
+      console.log('local update ' + id)
+      db.get(id.toString()).then(async (doc) => {
+        console.log(doc)
+        await this.setState({dataSource: doc.items})
+        // this._getUpdate();
+      })
+      .then(() => this.forceUpdate())
+      .catch((err) => {
+        if (err.status === 404) {
+          console.log('local update 404')
+          this.setState({dataSource: []})
+          this._getUpdate(1);
+        }
+      })
+    }
+
+    _localAdd = async (page) => {
+      console.log('local add')
+      let doc = {}
+      let id = this.state.page + this.state.sort
+      db.get(id.toString()).then(async (doc) => {
+        doc._id = id.toString()
+        doc.page = this.state.page
+        doc.sort = this.state.sort
+        doc.items = page
+        db.put(doc).catch(err => {
+          console.log('local add error', err)
+          if (err.status === 409) {
+            // this._getUpdate()
+          }
+        })
+      })
+      .catch(err => {
+        doc._id = id.toString()
+        doc.page = this.state.page
+        doc.sort = this.state.sort
+        doc.items = page
+        db.put(doc)
+        .then(() => {
+          setTimeout(() => this.forceUpdate(), 200)
+        }).catch(err => {
+          console.log('local add error', err)
+          if (err.status === 409) {
+            this._getUpdate()
+          }
+        })
+      })
+    }
+
+    _getUpdate = async (q) => {
+      console.log('get update')
       let sort = await this.state.sort;
-      fetch('/movies/'+sort+'/1', {
+      fetch('/movies/'+sort+'/'+this.state.page, {
         method: 'GET',
         Accept: 'application/json',
       })
       .then(response => response.json())
       .then(res => {
-        console.log(res);
-        this.setState({dataSource: res});
+        // this.setState({dataSource: res});
+        this._localAdd(res).then(() => {
+          if (q === 1) this._localUpdate(this.state.page + this.state.sort)
+        })
       })
-      .catch(err => console.error('Caught error: ', err))
+      .catch(err => console.error('Caught error: ', err))    
     }
 
     _view = async (id) => {
         await this.setState({view: id}, () => {
             this.forceUpdate();
         })
+    }
+
+    _resetView = () => {
+      this.setState({view: -1})
+    }
+
+    _gotoPage = i => {
+      let id = i + this.state.sort
+      this.setState({page: i}, this._localUpdate(id))
     }
   
     _onChange = (e) => {
@@ -118,96 +186,60 @@ export default class Browser extends Component {
             )
         })
       }
-    return (
-      <div className='notes-cnt'>
-        <div className='notes-header'>
-          <img src={require('../resources/img/Hypo.png')} alt='' className='hypo-menu' style={{left: this.state.view >= 0 ? -42+'px' : 10+'px'}} />
-          <svg
-          onClick={() => this.setState({view: -1})}
-          className='icon-back'
-          style={{opacity: this.state.view >= 0 ? '1' : '0'}}
-          xmlns="http://www.w3.org/2000/svg"
-          xmlnsXlink="http://www.w3.org/1999/xlink"
-          version="1.1"
-          x="0px"
-          y="0px"
-          fill='#c41313'
-          viewBox="0 0 100 125"
-          xmlSpace="preserve"><g>
-          <path d="M60.9,29.6c-0.8-0.8-2-0.8-2.8,0l-19,19c-0.8,0.8-0.8,2,0,2.8l19,19c0.4,0.4,0.9,0.6,1.4,0.6s1-0.2,1.4-0.6   c0.8-0.8,0.8-2,0-2.8L43.3,50l17.6-17.6C61.7,31.6,61.7,30.4,60.9,29.6z"/>
-          </g></svg>
-          <h1 style={{paddingLeft: '15px'}}>{this.state.view >= 0 ? 'Back': this.state.sort_v}</h1>
-          {top_sort.map((s,i) => {
-            if (s.v !== this.state.sort_v) return <h2 key={ i } onClick={() => this.setState({sort: s.s, sort_v: s.v, dataSource: []}, () => this._getUpdate())} >{ s.v }</h2>
-          })}
-          <input className='notes-search' onChange={this._onChange} value={ this.state.search } type='search' placeholder='Search' />
+      
+      return (
+        <div className='notes-cnt'>
+          <div className='notes-header'>
+            <img src={require('../resources/img/Hypo.png')} alt='' className='hypo-menu' style={{left: this.state.view >= 0 ? -42+'px' : 10+'px'}} />
+            <IconBack onClick={this._resetView} style={this.state.view} />
+            <h1 style={{paddingLeft: '15px'}}>{this.state.view >= 0 ? 'Back': this.state.sort_v}</h1>
+            {top_sort.map((s,i) => {
+              // if (s.v !== this.state.sort_v)
+              return <h2 key={ i } onClick={() => this.setState({sort: s.s, sort_v: s.v, dataSource: []}, () => this._getUpdate())} >{ s.v }</h2>
+            })}
+            <input className='notes-search' onChange={this._onChange} value={ this.state.search } type='search' placeholder='Search' />
+          </div>
+          {this.state.view >= 0 && <Viewer details={this.state.dataSource[this.state.view]} />}
+            {!Movies ? 
+                <PreLoader />
+            :
+                <div className='notes-list' ref={r => this.tasks = r} >
+                  <ContextMenu visible={this.state.context} x={this.state.context.x} y={this.state.context.y} />
+                  { Movies }
+                </div>
+            }
+          <Pages current={this.state.page} goto={this._gotoPage} />
         </div>
-         {this.state.view >= 0 && <Viewer details={this.state.dataSource[this.state.view]} />}
-          {!Movies ? 
-              <PreLoader />
-          :
-              <div className='notes-list' >
-                { Movies }
-              </div>
-          }
-      </div>
-    )
+      )
   }
 }
 
-class Viewer extends Component {
+class ContextMenu extends Component {
   constructor(props) {
-    super(props);
-    this.state = {
-      watch: false,
-      _id: this.props._id
-    }
+    super(props)
   }
-
-  componentWillMount() {
-    console.log(this.props)
-  }
-
-  // componentWillUnmount() {
-  //   fetch('http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/done', {
-  //       method: 'GET'
-  //     })
-  // }
 
   render() {
-    // const poster = 'https://cors-anywhere.herokuapp.com/' + this.props.details.medium_cover_image
-    return (
-     
-        <div className={'note-view-item'}>
-          <div className='viewer-info'>
-            {/* <div className='blur' style={{backgroundImage: `url(${props.details.medium_cover_image})`}} /> */}
-            <img src={'/posters/' + this.props.details.slug + '.jpg'} className='img-poster' alt=''/>
-            <div>
-              {this.state.watch && 
-              <video
-                ref={r => this.player = r}
-                className='video-player'
-                controls
-                controlsList="nodownload"
-                poster={'/covers/' + this.props.details.slug + '.jpg'}
-                on
-                src={'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug} />
-              }
-              {!this.state.watch &&
-                <div className='mov-prev-cnt'>
-                  <img className='mov-preview' src={'/covers/' + this.props.details.slug + '.jpg'} alt='' />
-                  <img onClick={() => this.setState({watch: true})} className='mov-play' src={require('../resources/img/play.png')} alt='' />
-                </div>
-              }
-            </div>
-            
-            <p className='note-item-origin'>{this.props.details.synopsis}</p>
-            <p className='note-item-header'>{this.props.details.title} <i style={{fontWeight: '100', fontSize: 16+'px', opacity: 0.7}}>({this.props.details.year})</i></p>
-            <p className='movie-runtime'>Runtime: {this.props.details.runtime}m</p>
-            <p className='movie-rating'>Rating: {this.props.details.rating}</p>
-            <p className='note-item-text'>{this.props.details.genres.map((g,i) => {if (!this.props.details.genres[i+1]){return g} else {return g+', '}})}</p>
+    if (this.props.visible) {
+      return (
+        <div className='context-menu'
+          ref={e => this.context = e}
+          style={{top:this.props.x,left:this.props.y}}>
+          <p className='context-menu-item' onClick={this._mark} style={{color: '#c41313'}}>close</p>
+          <VerticalSeparator color='#ccc' />
+          <p className='context-menu-item' onClick={this._edit}>info</p>
+          <VerticalSeparator color='#ccc' />
+          <p className='context-menu-item delete' onClick={this._delete}>like</p>
         </div>
-      </div>
-    )
+      )
+    } else return null
   }
 }
+
+const VerticalSeparator = (props) => (
+  <div style={{
+    width: 1+'px',
+    height: 100+'%',
+    backgroundColor: props.color,
+  }} />
+)
