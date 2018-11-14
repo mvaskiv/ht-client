@@ -114,6 +114,42 @@
   margin-bottom: 5px;
 }
 
+.user-panel {
+  position: relative;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: auto;
+  text-align: center;
+}
+.settings-div {
+  display: flex;
+  flex-direction: row;
+  /* background-color: #191919; */
+  height: 48px;
+  margin-top: 5px;
+}
+.settings-div label{
+  text-align: left!important;
+  height: 50px;
+  width: 110px;
+  line-height: 39px;
+  padding-left: 15px;
+  padding-top: 5px;
+  color: #999;
+  border-right: 1px solid #333;
+}
+
+.settings-div input {
+  height: 46px;
+  top: 0;
+  margin-top: 0;
+  
+  background-color: #191919;
+  color: #aaa;
+}
+
 .context-menu {
   position: absolute;
   display: flex;
@@ -1033,7 +1069,6 @@ p.tags-place {
   position: absolute;
   text-align: center;
   width: 220px;
-  /* padding-left: 20px; */
   line-height: 4px;
   font-weight: 200;
   cursor: pointer;
@@ -1041,7 +1076,7 @@ p.tags-place {
 
 .trailer-btn img {
   position: absolute;
-  top: 7px;
+  top: 6px;
   right: 32px;
   width: 25px;
   cursor: pointer;
@@ -1058,6 +1093,30 @@ p.tags-place {
   margin: auto;
   top: 350px;
   z-index: 99;
+}
+
+.video-resolutions {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  top: 315px;
+  right: 15px;
+}
+.resolution-button {
+  position: relative;
+  margin: 7px;
+  /* border: 1px solid #fff; */
+  height: 20px;
+}
+
+.resolution-button p {
+  color: #bbb;
+  margin: 0;
+  cursor: pointer;
+}
+
+.resolution-button p:hover {
+  color: #fff;
 }
 
 .trailer-viewer {
@@ -1121,7 +1180,7 @@ p.tags-place {
 
 .notes-search {
   position: absolute;
-  bottom: 8px;
+  bottom: 5px;
   width: 200px;
   min-width: 200px;
   max-width: 400px;

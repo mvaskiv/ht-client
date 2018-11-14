@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PouchDB from 'pouchdb';
 import PouchFind from 'pouchdb-find';
+import * as Preg from './reusable/preg';
 import { Today } from './constants/Today';
-// import { QR } from './constants/QR';
 import Tasks from './screens/Tasks';
 import Browser from './screens/Browser';
 import './App.css';
@@ -15,47 +15,21 @@ class App extends Component {
     super();
     this.state = {
       form: false,
-      uuid: localStorage.getItem('uuid')
+      uuid: localStorage.getItem('uuid'),
+      auth: localStorage.getItem('auth'),
+      user: {}
     }
-    // this._bootstrapAsync();
-  }
-  
-  _dbSync = (uuid) => {
-    // const remoteDB = new PouchDB('https://mneme-app.herokuapp.com/db/' + uuid)
-    // db.sync(remoteDB, {
-    //   live: true,
-    //   retry: true
-    // })
-    // db.changes({
-    //   since: 'now',
-    //   live: true,
-    //   include_docs: true
-    // }).on('change', () => this.tasks._getUpdate())
-    // .on('error', function (err) {
-    //   console.error(err);
-    // });
+    this._bootstrapAsync()
   }
 
   _bootstrapAsync = async () => {
-    localStorage.setItem('uuid', '2ce029af-4452-493e-9f06-98d2a4e46675')
-    // let uuid = await localStorage.getItem('uuid');
-    // console.log(uuid)
-    // if (!uuid) {
-    //   fetch('https://mneme-app.herokuapp.com/init', {
-    //     method: 'GET',
-    //     Accept: 'application/json',
-    //     'Content-Type': 'application/x-www-form-urlencoded',
-    //   })
-    //   .then((response) => response.json())
-    //   .then((res) => {
-    //     if (res.uuid) {
-    //       localStorage.setItem('uuid', res.uuid)
-    //       this._dbSync(res.uuid)
-    //     }
-    //   })
-    // } else {
-    //   this._dbSync(uuid.toString())
-    // }
+    // console.log(Preg.EmailPreg)
+    // localStorage.setItem('uuid', '2ce029af-4452-493e-9f06-98d2a4e46675')
+  }
+
+  _logOut = async () => {
+    await localStorage.clear();
+    setTimeout(() => window.location.replace('/'), 155);
   }
 
   render() {
@@ -63,11 +37,17 @@ class App extends Component {
       <div className="App">
         <header className='titleBar'>
           <p>HypoTube</p>
-          <p className='login-btn' onClick={() => this.setState({form: !this.state.form})}>Log in / Register</p>
+          {!this.state.uuid
+            ? <p className='login-btn' onClick={() => this.setState({form: !this.state.form})}>Log in / Register</p>
+            : <p className='login-btn' onClick={() => this.setState({form: !this.state.form})}>{this.state.uuid}</p>
+          }
         </header>
         <div className="App-header">
           <div className='notes'>
-            <LoginFrom visible={this.state.form} />
+            {!this.state.uuid
+              ? <LoginFrom visible={this.state.form} login={this._logIn} />
+              : <UserPanel visible={this.state.form} logout={this._logOut} uuid={this.state.uuid} auth={this.state.auth}/>
+            }
             <Browser />
           </div>
         </div>
@@ -80,9 +60,9 @@ class LoginFrom extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      uname: '',
+      uname: 'qwe',
       upass: '',
-      email: '',
+      email: 'qwe',
       fname: '',
       lname: '',
       type: 'login',
@@ -90,9 +70,66 @@ class LoginFrom extends Component {
     }
   }
 
-  _submit = n => {
-    this.setState({fetching: true}, () => {
+  _register = async () => {
+    let data = await {
+      uname: this.state.uname,
+      upass: this.state.upass,
+      email: this.state.email,
+      fname: this.state.fname,
+      lname: this.state.lname,
+    }
+    this.setState({fetching: true}, async () => {
+      return new Promise((resolve, reject) => {
+        fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(data)
+        }).then(r => r.json())
+        .then((res) => {
+          if (res.status === 'registered') {
+           this.setState({registered: true})
+            resolve('ok')
+          } else {
+            reject(res)
+          }
+        })
+      }).catch((e) => {
+        this.setState({fetching: false})
+        console.error(e)
+      })
+    })
+  }
 
+  _submit = () => {
+    this.setState({fetching: true}, async () => {
+      let data = await {uname: this.state.uname, upass: this.state.upass}
+      return new Promise((resolve, reject) => {
+        fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(data)
+        }).then(r => r.json())
+        .then((res) => {
+          if (res.status === 'login') {
+            localStorage.setItem('auth', res.auth)
+            localStorage.setItem('uuid', res.uuid)
+            resolve('ok')
+          } else {
+            reject(res)
+          }
+        })
+      }).then((res) => {
+        if (res === 'ok') window.location.replace('/')
+      }).catch((e) => {
+        this.setState({fetching: false})
+        console.error(e)
+      })
     })
   }
 
@@ -102,7 +139,8 @@ class LoginFrom extends Component {
 
   render() {
     if (this.props.visible) {
-      return (
+      if (this.state.fetching) return <div></div>
+      else return (
         <div className='login-form'>
           <div className='log-or-reg'>
             <h2 style={{fontWeight: this.state.type === 'login' ? '700' : '200'}} onClick={() => this.setState({type: 'login'})}>Log in&nbsp;</h2>
@@ -120,19 +158,119 @@ class LoginFrom extends Component {
               <input type='text' value={this.state.lname} name='lname' onChange={this._onChange} placeholder='last name' />
             </div>
           }
-          <p>Submit</p>
+          <p onClick={this._submit}>Submit</p>
         </div>
       )
     } else return null
   }
 }
 
-// const TasksFooter = (props) => {
-//   return (
-//     <div className='tasks-footer'>
-//        <QR uuid={props.uuid} />
-//     </div>
-//   )
-// }
+class UserPanel extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      me: {}
+    }
+    this._bootstrapAsync();
+  }
+
+  _bootstrapAsync = async () => {
+    fetch('/user/'+this.props.uuid, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        auth: this.props.auth
+      })
+    }).then(r => r.json())
+    .then(res => {
+      if (res.status === 'ok') this.setState({...res.me})
+      else if (res.rejection === 'logout' || res.error === 'no_permission') {
+        localStorage.clear();
+        window.location.reload('/');
+      }
+    })
+    .catch(e => console.log(e))
+  }
+
+  _onChange = e => {
+    this.setState({[e.target.name]:e.target.value})
+  }
+
+  render() {
+    if (this.props.visible) {
+      return (
+        <div className='login-form'>
+          <div className='user-panel'>
+            <h3>Profile info</h3>
+            <div className='settings-div'>
+              <label>Login:</label>
+              <input type='text' value={this.state.uname} name='uname' onChange={this._onChange} placeholder='last name' />
+            </div>
+            <div className='settings-div'>
+              <label>First Name:</label>
+              <input type='text' value={this.state.fname} name='fname' onChange={this._onChange} placeholder='last name' />
+            </div>
+            <div className='settings-div'>
+              <label>Last Name:</label>
+              <input type='text' value={this.state.lname} name='lname' onChange={this._onChange} placeholder='last name' />
+            </div>
+            <div className='settings-div'>
+              <label>Email:</label>
+              <input type='text' value={this.state.email} name='email' onChange={this._onChange} placeholder='last name' />
+            </div>
+           
+          </div>
+          <p onClick={this.props.logout}>Log Out</p>
+        </div>
+      )
+    } else return null
+  }
+}
 
 export default App;
+
+
+// <script>
+//   window.fbAsyncInit = function() {
+//     FB.init({
+//       appId      : '489195768245540',
+//       cookie     : true,
+//       xfbml      : true,
+//       version    : 'v3.2'
+//     });
+      
+//     FB.AppEvents.logPageView();   
+      
+//   };
+
+//   (function(d, s, id){
+//      var js, fjs = d.getElementsByTagName(s)[0];
+//      if (d.getElementById(id)) {return;}
+//      js = d.createElement(s); js.id = id;
+//      js.src = "https://connect.facebook.net/en_US/sdk.js";
+//      fjs.parentNode.insertBefore(js, fjs);
+//    }(document, 'script', 'facebook-jssdk'));
+// </script>
+
+// FB.getLoginStatus(function(response) {
+//   statusChangeCallback(response);
+// });
+
+
+//  AFTEBODY
+
+// <div id="fb-root"></div>
+// <script>(function(d, s, id) {
+//   var js, fjs = d.getElementsByTagName(s)[0];
+//   if (d.getElementById(id)) return;
+//   js = d.createElement(s); js.id = id;
+//   js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2&appId=489195768245540';
+//   fjs.parentNode.insertBefore(js, fjs);
+// }(document, 'script', 'facebook-jssdk'));</script>
+
+//  PLUGIN
+
+{/* <div class="fb-login-button" data-width="50" data-max-rows="1" data-size="small" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false"></div> */}
