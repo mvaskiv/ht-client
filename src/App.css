@@ -138,15 +138,13 @@
   padding-left: 15px;
   padding-top: 5px;
   color: #999;
-  border-right: 1px solid #333;
 }
 
 .settings-div input {
   height: 46px;
   top: 0;
   margin-top: 0;
-  
-  background-color: #191919;
+  background-color: #222;
   color: #aaa;
 }
 

@@ -18,14 +18,17 @@ export default class Viewer extends Component {
   
     render() {
       let sources = this.props.details.torrents.map((t, i) => {
-        return (<div className='resolution-button' key={ i } onClick={() => {
-          this.setState({resolution: t.quality})
-          this._videoResolution('http://localhost:8000/stream/'+t.hash+'/'+this.props.details.slug)}
-        }><p style={{color: this.state.resolution === t.quality ? '#fff' : '#bbb'}}>{t.quality}</p></div>)
+        if (i < 3) return (
+          <div className='resolution-button' key={ i } onClick={() => {
+            this.setState({resolution: t.quality})
+            this._videoResolution('http://localhost:8000/stream/'+t.hash+'/'+this.props.details.slug)}
+          }><p style={{color: this.state.resolution === t.quality ? '#fff' : '#bbb'}}>{t.quality}</p></div>
+        )
+        else return null
       })
       return (
-          <div className={'note-view-item'}>
-            {this.state.trailer && <Trailer id={this.props.details.yt_trailer_code} close={() => this.setState({trailer: false})} />}
+        <div className={'note-view-item'}>
+          {this.state.trailer && <Trailer id={this.props.details.yt_trailer_code} close={() => this.setState({trailer: false})} />}
             <div className='viewer-info'>
                 <div className='viewer-poster-trailer'>
                     <img src={'/posters/' + this.props.details.slug + '.jpg'} className='img-poster' alt=''/>
@@ -52,6 +55,7 @@ export default class Viewer extends Component {
                     </div>
                 }
               </div>
+              
               <div className='video-resolutions'>
                 { sources }
               </div>
@@ -67,10 +71,10 @@ export default class Viewer extends Component {
 }
 
 const Trailer = ({id, close}) => (
-    <div className='trailer-viewer'>
-        <div style={{width: 100 + '%', height: 100 + '%'}} onClick={close} />
-        <iframe id="ytplayer" type="text/html" width="640" height="360" title='traier'
-            src={'https://www.youtube.com/embed/' + id +  '?autoplay=1&origin=http://example.com'}
-            frameBorder="0"></iframe>
-    </div>
+  <div className='trailer-viewer'>
+      <div style={{width: 100 + '%', height: 100 + '%'}} onClick={close} />
+      <iframe id="ytplayer" type="text/html" width="640" height="360" title='traier'
+          src={'https://www.youtube.com/embed/' + id +  '?autoplay=1&origin=http://example.com'}
+          frameBorder="0"></iframe>
+  </div>
 )

@@ -169,7 +169,7 @@ export default class Browser extends Component {
 
     _gotoPage = i => {
       // let id = i + this.state.sort
-      this.setState({page: i}, () => this._getUpdate())
+      this.setState({page: i, dataSource: []}, () => this._getUpdate())
     }
   
     _onChange = (e) => {
