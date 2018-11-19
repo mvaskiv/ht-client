@@ -47,6 +47,13 @@ export default class Browser extends Component {
       document.addEventListener('click', this._handleClick);
     }
 
+    componentWillReceiveProps() {
+      // if (this.props.goto.page !== this.state.sort || this.props.goto.id !== this.state.page) {
+      //   this._getUpdate()
+      //   console.log('qwe')
+      // }
+    }
+
     _handleClick = (e) => {
       if (e.target !== this.context) {
         this.setState({context: false});
@@ -65,9 +72,21 @@ export default class Browser extends Component {
     }
 
     _bootsrapAsync = async () => {
-      // await this._getUpdate();
-      // let id = await this.state.page + this.state.sort
-      await this._getUpdate();
+      const sections = [
+        'rating',
+        'date_added',
+        'like_count'
+      ]
+      let path = await window.location.pathname.split('/')
+      if (sections.some(s => s === path[1])) {
+        let goto = {
+          page: path[1],
+          id: typeof parseInt(path[2]) === 'number' ? parseInt(path[2]) : 0,
+        }
+        this.setState({sort: goto.page, page: goto.id}, () => this._getUpdate(goto))
+      } else {
+        this._getUpdate();
+      }
       this.setState({uuid: localStorage.getItem('uuid')});
     }
   
@@ -140,9 +159,9 @@ export default class Browser extends Component {
     // }
 
     _getUpdate = async (q) => {
-      console.log('get update')
-      let sort = await this.state.sort;
-      fetch('/movies/'+sort+'/'+this.state.page, {
+      let sort = await q ? q.page : this.state.sort;
+      let page = await q ? q.id || 0 : this.state.page;
+      fetch('/movies/'+sort+'/'+page, {
         method: 'GET',
         Accept: 'application/json',
       })
@@ -194,7 +213,10 @@ export default class Browser extends Component {
             <h1 style={{paddingLeft: '15px'}}>{this.state.view >= 0 ? 'Back': this.state.sort_v}</h1>
             {top_sort.map((s,i) => {
               // if (s.v !== this.state.sort_v)
-              return <h2 key={ i } onClick={() => this.setState({sort: s.s, sort_v: s.v, dataSource: []}, () => this._getUpdate())} >{ s.v }</h2>
+              return <h2 key={ i } onClick={() => {
+                // window.location.replace(`/${s.s}/1`)
+                this.setState({sort: s.s, sort_v: s.v, page: 1, dataSource: []}, () => this._getUpdate())
+              }} >{ s.v }</h2>
             })}
             <input className='notes-search' onChange={this._onChange} value={ this.state.search } type='search' placeholder='Search' />
           </div>

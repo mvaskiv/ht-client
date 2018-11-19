@@ -17,14 +17,13 @@ class App extends Component {
       form: false,
       uuid: localStorage.getItem('uuid'),
       auth: localStorage.getItem('auth'),
-      user: {}
+      user: {},
     }
     this._bootstrapAsync()
   }
 
   _bootstrapAsync = async () => {
-    // console.log(Preg.EmailPreg)
-    // localStorage.setItem('uuid', '2ce029af-4452-493e-9f06-98d2a4e46675')
+    console.log(window.location) 
   }
 
   _logOut = async () => {

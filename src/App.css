@@ -747,6 +747,7 @@ p.tags-place {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   justify-content: center;
   /* align-content: center; */
   /* background-color: #aaa; */
@@ -760,17 +761,17 @@ p.tags-place {
 }
 
 .note-list-item {
-  /* display: flex; */
+  display: flex;
   flex-grow: 1;
   position: relative;
   margin: 10px;
   height: auto;
-  max-height: 400px;
-  /* width: 235px; */
-  min-width: 240px;
-  max-width: 275px;
+  /* /* min-height: calc(100vw / 10); */
+  /* max-height: calc(100vw / 8); */
+  /* width: calc(100vw / 7.7); */
+  min-width: calc(100vw / 12);
+  max-width: calc(100vw / 6);
   padding: 0px;
-  flex-direction: row;
   background-color: transparent!important;
   background: no-repeat center;
   background-size: cover;

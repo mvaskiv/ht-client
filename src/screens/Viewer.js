@@ -5,7 +5,6 @@ export default class Viewer extends Component {
       super(props);
       this.state = {
         watch: false,
-        _id: this.props._id,
         trailer: false,
         resolution: this.props.details.torrents[0].quality,
         url: 'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug
