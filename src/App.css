@@ -1040,10 +1040,33 @@ p.tags-place {
   padding-left: 10px!important;
   margin: 0!important;
   width: 100%;
+  min-width: calc(100% - 20px);
+  min-height: 500px;
+  background-color: #232323;
   height: auto;
   /* max-height: calc(100% - 430px) */
 }
 
+.y-info {
+  position: relative;
+  width: 100%;
+  display: inline-block;
+}
+
+.imdb-info {
+  position: absolute;
+  top:  325px;
+  padding-left: 10px;
+  display: inline-block;
+  width: 100%;
+  text-align: left;
+  line-height: 10px;
+}
+
+.imdb-info p {
+  font-weight: 200;
+  color: #ddd;
+}
 
 
 .viewer-poster-trailer {
@@ -1138,6 +1161,8 @@ p.tags-place {
 
 .viewer-info {
   /* display: inline-flex; */
+  display: flex;
+  flex-direction: column;
   position: relative;
   margin-left: auto;
   margin-right: auto;

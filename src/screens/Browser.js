@@ -90,88 +90,16 @@ export default class Browser extends Component {
       this.setState({uuid: localStorage.getItem('uuid')});
     }
   
-
-    // _getLocal = () => {
-    //   let selector = {
-    //     'page': this.state.page,
-    //     'sort': this.state.sort,
-    //   }
-    //   db.createIndex({
-    //     index: {fields: ['page']},
-    //   })
-    //   db.find({
-    //     selector: selector,
-    //     sort: ['_id'],
-    //   }).then((res) => {
-    //     console.log(res.docs)
-    //     // this.setState({ dataSource: res.docs }, () => {
-    //     //   this.setState({loaded: true}, () => this.forceUpdate())
-    //     // })
-    //   });
-    // }
-
-    // _localUpdate = (id) => {
-    //   console.log('local update ' + id)
-    //   db.get(id.toString()).then(async (doc) => {
-    //     console.log(doc)
-    //     await this.setState({dataSource: doc.items})
-    //     // this._getUpdate();
-    //   })
-    //   .then(() => this.forceUpdate())
-    //   .catch((err) => {
-    //     if (err.status === 404) {
-    //       console.log('local update 404')
-    //       this.setState({dataSource: []})
-    //       this._getUpdate(1);
-    //     }
-    //   })
-    // }
-
-    // _localAdd = async (page) => {
-    //   console.log('local add')
-    //   let doc = {}
-    //   let id = this.state.page + this.state.sort
-    //   doc._id = id.toString()
-    //   doc.page = this.state.page
-    //   doc.sort = this.state.sort
-    //   doc.items = page
-    //   db.put(doc).catch(err => {
-    //     console.log('local add error', err)
-    //     if (err.status === 409) {
-    //       // this._getUpdate()
-    //     }
-    //   })
-    //   .catch(err => {
-    //     doc._id = id.toString()
-    //     doc.page = this.state.page
-    //     doc.sort = this.state.sort
-    //     doc.items = page
-    //     db.put(doc)
-    //     .then(() => {
-    //       setTimeout(() => this.forceUpdate(), 200)
-    //     }).catch(err => {
-    //       console.log('local add error', err)
-    //       if (err.status === 409) {
-    //         this._getUpdate()
-    //       }
-    //     })
-    //   })
-    // }
-
     _getUpdate = async (q) => {
       let sort = await q ? q.page : this.state.sort;
       let page = await q ? q.id || 0 : this.state.page;
-      fetch('/movies/'+sort+'/'+page, {
+      fetch('/movies-cache/'+sort+'/'+page, {
         method: 'GET',
         Accept: 'application/json',
       })
       .then(response => response.json())
       .then(res => {
-        console.log(res)
         this.setState({dataSource: res})
-        // this._localAdd(res).then(() => {
-        //   if (q === 1) this._localUpdate(this.state.page + this.state.sort)
-        // })
       })
       .catch(err => console.error('Caught error: ', err))    
     }

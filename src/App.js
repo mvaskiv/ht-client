@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import PouchDB from 'pouchdb';
 import PouchFind from 'pouchdb-find';
 import * as Preg from './reusable/preg';
-import { Today } from './constants/Today';
-import Tasks from './screens/Tasks';
 import Browser from './screens/Browser';
 import './App.css';
 

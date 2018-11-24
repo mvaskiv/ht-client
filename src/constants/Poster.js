@@ -30,7 +30,7 @@ export default class Poster extends Component {
                 <div className='movie-list-ol'>
                   <img src={require('../resources/img/play.png')} alt='' />
                 </div>
-                <img src={`${poster}?${this.state.hash}`} className='img-poster' alt=''/>
+                <img src={`https://cors-anywhere.herokuapp.com/${props.details.medium_cover_image}`} className='img-poster' alt=''/>
                 <p className='note-item-header'>{props.details.title}</p>
                 <p className='movie-list-year'>{props.details.year}</p>
                 <p className='note-item-text'>{props.details.genres[0] && props.details.genres.map((g,i) => {
