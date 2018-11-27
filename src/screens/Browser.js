@@ -3,11 +3,7 @@ import { PreLoader } from '../constants/loader';
 import Viewer from './Viewer';
 import Pages from '../reusable/pages';
 import Poster from '../constants/Poster';
-import PouchDB from 'pouchdb';
-import PouchFind from 'pouchdb-find';
 import { IconBack } from '../constants/svg';
-PouchDB.plugin(PouchFind);
-const db = new PouchDB('mydb-desktop')
 
 const top_sort = [
   {
@@ -33,7 +29,8 @@ export default class Browser extends Component {
         search: '',
         new: false,
         loaded: false,
-        sort_v: 'hypotube',
+        genre: 'all',
+        sort_v: 'rating',
         sort: 'rating',
         page: 1,
         context: false,
@@ -93,7 +90,7 @@ export default class Browser extends Component {
     _getUpdate = async (q) => {
       let sort = await q ? q.page : this.state.sort;
       let page = await q ? q.id || 0 : this.state.page;
-      fetch('/movies-cache/'+sort+'/'+page, {
+      fetch('/movies-cache/'+sort+'/'+this.state.genre+'/'+page, {
         method: 'GET',
         Accept: 'application/json',
       })
@@ -102,6 +99,12 @@ export default class Browser extends Component {
         this.setState({dataSource: res})
       })
       .catch(err => console.error('Caught error: ', err))    
+    }
+
+    _titleSearch = k => {
+      if (k.key === 'Enter') {
+        console.log('asdasd')
+      }
     }
 
     _view = async (id) => {
@@ -117,6 +120,10 @@ export default class Browser extends Component {
     _gotoPage = i => {
       // let id = i + this.state.sort
       this.setState({page: i, dataSource: []}, () => this._getUpdate())
+    }
+
+    _setGenre = k => {
+      this.setState({genre: k, dataSource: []}, () => this._getUpdate())
     }
   
     _onChange = (e) => {
@@ -138,15 +145,17 @@ export default class Browser extends Component {
           <div className='notes-header'>
             <img src={require('../resources/img/Hypo.png')} alt='' className='hypo-menu' style={{left: this.state.view >= 0 ? -42+'px' : 10+'px'}} />
             <IconBack onClick={this._resetView} style={this.state.view} />
-            <h1 style={{paddingLeft: '15px'}}>{this.state.view >= 0 ? 'Back': this.state.sort_v}</h1>
-            {top_sort.map((s,i) => {
-              // if (s.v !== this.state.sort_v)
-              return <h2 key={ i } onClick={() => {
-                // window.location.replace(`/${s.s}/1`)
-                this.setState({sort: s.s, sort_v: s.v, page: 1, dataSource: []}, () => this._getUpdate())
-              }} >{ s.v }</h2>
-            })}
-            <input className='notes-search' onChange={this._onChange} value={ this.state.search } type='search' placeholder='Search' />
+            <h1 style={{paddingLeft: '15px'}}>{this.state.view >= 0 ? 'Back': 'hypotube'}</h1>
+            {
+              top_sort.map((s,i) => {
+                return <h2 key={ i } style={{color: s.s === this.state.sort ? '#bababa' : '#777' }} onClick={() => {
+                  this.setState({sort: s.s, sort_v: s.v, page: 1, dataSource: []}, () => this._getUpdate())
+                }} >{ s.v }</h2>
+              })
+            }
+            <h2 className='cat-trigger'>Categories</h2>
+            <Categories cat={ this.state.genre } genre={ this._setGenre } />
+            <input className='notes-search' onKeyPress={ this._titleSearch } onChange={this._onChange} value={ this.state.search } type='search' placeholder='Search' />
           </div>
           {this.state.view >= 0 && <Viewer details={this.state.dataSource[this.state.view]} />}
             {!Movies ? 
@@ -163,11 +172,46 @@ export default class Browser extends Component {
   }
 }
 
-class ContextMenu extends Component {
-  constructor(props) {
-    super(props)
-  }
+const catList = [
+  'All',
+  'Action',
+  'Adventure',
+  'Animation',
+  'Biography',
+  'Comedy',
+  'Crime',
+  'Documentary',
+  'Drama',
+  'Family',
+  'Fantasy',
+  'History',
+  'Horror',
+  'Music',
+  'Musical',
+  'Mystery',
+  'Romance',
+  'Sci-Fi',
+  'Short',
+  'Sport',
+  'Superhero',
+  'Thriller',
+  'War',
+  'Western',
+]
 
+const Categories = (props) => {
+  return (
+    <div className='categories'>
+      {
+        catList.map((k, i) => {
+          return <p key={ i } style={{ color: props.cat === k.toLowerCase() ? '#fff' : '#777'}} onClick={() => props.genre(k.toLowerCase())}>{ k }</p>
+        })
+      }
+    </div>
+  )
+}
+
+class ContextMenu extends Component {
   render() {
     if (this.props.visible) {
       return (

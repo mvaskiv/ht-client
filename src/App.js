@@ -1,12 +1,8 @@
 import React, { Component } from 'react';
-import PouchDB from 'pouchdb';
-import PouchFind from 'pouchdb-find';
-import * as Preg from './reusable/preg';
+// import * as Preg from './reusable/preg';
 import Browser from './screens/Browser';
 import './App.css';
 
-PouchDB.plugin(PouchFind);
-const db = new PouchDB('mydb-desktop')
 
 class App extends Component {
   constructor() {
@@ -21,7 +17,23 @@ class App extends Component {
   }
 
   _bootstrapAsync = async () => {
-    console.log(window.location) 
+    let path = await window.location.pathname.split('/')
+    if (path[1] === 'oauth') {
+      let token = path[2].split('.')[1]
+
+      fetch('/token_login/'+token, {
+        method: 'GET',
+        Accept: 'application/json',
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res) {
+          localStorage.setItem('auth', res.auth)
+          localStorage.setItem('uuid', res.uuid)
+        }
+      }).then(() => window.location.replace('/'))
+      .catch(err => console.error('Caught error: ', err))    
+    }
   }
 
   _logOut = async () => {
@@ -100,6 +112,10 @@ class LoginFrom extends Component {
     })
   }
 
+  _ftOauth = async () => {
+    window.location.replace('https://' + window.location.hostname + ':8443/auth/42')
+  }
+
   _submit = () => {
     this.setState({fetching: true}, async () => {
       let data = await {uname: this.state.uname, upass: this.state.upass}
@@ -156,6 +172,7 @@ class LoginFrom extends Component {
             </div>
           }
           <p onClick={this._submit}>Submit</p>
+          <p onClick={this._ftOauth}>42</p>
         </div>
       )
     } else return null
@@ -228,46 +245,3 @@ class UserPanel extends Component {
 }
 
 export default App;
-
-
-// <script>
-//   window.fbAsyncInit = function() {
-//     FB.init({
-//       appId      : '489195768245540',
-//       cookie     : true,
-//       xfbml      : true,
-//       version    : 'v3.2'
-//     });
-      
-//     FB.AppEvents.logPageView();   
-      
-//   };
-
-//   (function(d, s, id){
-//      var js, fjs = d.getElementsByTagName(s)[0];
-//      if (d.getElementById(id)) {return;}
-//      js = d.createElement(s); js.id = id;
-//      js.src = "https://connect.facebook.net/en_US/sdk.js";
-//      fjs.parentNode.insertBefore(js, fjs);
-//    }(document, 'script', 'facebook-jssdk'));
-// </script>
-
-// FB.getLoginStatus(function(response) {
-//   statusChangeCallback(response);
-// });
-
-
-//  AFTEBODY
-
-// <div id="fb-root"></div>
-// <script>(function(d, s, id) {
-//   var js, fjs = d.getElementsByTagName(s)[0];
-//   if (d.getElementById(id)) return;
-//   js = d.createElement(s); js.id = id;
-//   js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2&appId=489195768245540';
-//   fjs.parentNode.insertBefore(js, fjs);
-// }(document, 'script', 'facebook-jssdk'));</script>
-
-//  PLUGIN
-
-{/* <div class="fb-login-button" data-width="50" data-max-rows="1" data-size="small" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false"></div> */}

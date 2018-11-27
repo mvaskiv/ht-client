@@ -735,7 +735,10 @@ p.tags-place {
   color: #ccc;
   transition: all 125ms ease-in-out;
 }
-
+.notes-header h2:hover {
+  color: #aaa!important;
+  transition: all 200ms ease;
+}
 .notes-list {
   position: relative;
   top: 2px;
@@ -1202,6 +1205,32 @@ p.tags-place {
   transition: opacity 85ms ease-in;
 }
 
+.cat-trigger:hover ~ .categories, .categories:hover {
+  display: flex;
+}
+
+.categories {
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  flex-wrap: wrap;
+  top: 70px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 360px;
+  height: 400px;
+  background-color: #262626;
+  box-shadow: 0px 0px 10px #161616;
+  z-index: 999;
+}
+
+.categories p:hover {
+  cursor: pointer;
+  color: #dadada!important;
+}
+
 .notes-search {
   position: absolute;
   bottom: 5px;
@@ -1221,7 +1250,7 @@ p.tags-place {
 }
 
 .notes-search:focus {
-  width: 400px;
+  width: 250px;
   transition: all 175ms ease-in-out;
 }
 

@@ -46,7 +46,7 @@ export default class Viewer extends Component {
             <div className='viewer-info'>
               <div className='y-info'>
                 <div className='viewer-poster-trailer'>
-                  <img src={'/posters/' + this.props.details.slug + '.jpg'} className='img-poster' alt=''/>
+                  <img src={`https://cors-anywhere.herokuapp.com/${this.props.details.medium_cover_image}`} className='img-poster' alt=''/>
                   <div className='trailer-btn'
                     onClick={() => this.setState({trailer: true})}>
                       <p>Watch Trailer</p>
