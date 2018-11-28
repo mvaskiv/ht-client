@@ -34,6 +34,7 @@ export default class Browser extends Component {
         sort: 'rating',
         page: 1,
         context: false,
+        network: false,
       }
       this._bootsrapAsync();
     }
@@ -61,9 +62,10 @@ export default class Browser extends Component {
       await e.preventDefault()
       // console.log(e.target.className)
       if (typeof e.target.className === 'string' && e.target.className.match(/(movie-list-ol)|(note-list-item)/)) {
+        // console.log(e.target.className.split(' ')[1])
         const left = window.innerHeight - e.clientX > 320 ? e.clientX + 5 : e.clientX - 175;
         const top = (e.clientY - this.tasks.offsetTop) + this.tasks.scrollTop;
-        this.setState({context: {x: top, y: left}});
+        this.setState({context: {x: top, y: left, target: e.target.className.split(' ')[1]}});
         
       }
     }
@@ -98,7 +100,10 @@ export default class Browser extends Component {
       .then(res => {
         this.setState({dataSource: res})
       })
-      .catch(err => console.error('Caught error: ', err))    
+      .catch(err => {
+        this.setState({network: true})
+        console.error('Caught error on load: ', err)
+      })    
     }
 
     _titleSearch = k => {
@@ -140,6 +145,8 @@ export default class Browser extends Component {
         })
       }
       
+      if (this.state.network) return <div className='notes-cnt'><PreLoader network={ this.state.network } /></div>
+
       return (
         <div className='notes-cnt'>
           <div className='notes-header'>
@@ -159,10 +166,10 @@ export default class Browser extends Component {
           </div>
           {this.state.view >= 0 && <Viewer details={this.state.dataSource[this.state.view]} />}
             {!Movies ? 
-                <PreLoader />
+                <PreLoader network={ this.state.network } />
             :
                 <div className='notes-list' ref={r => this.tasks = r} >
-                  <ContextMenu visible={this.state.context} x={this.state.context.x} y={this.state.context.y} />
+                  <ContextMenu open={this._view} visible={this.state.context} x={this.state.context.x} y={this.state.context.y} />
                   { Movies }
                 </div>
             }
@@ -212,6 +219,11 @@ const Categories = (props) => {
 }
 
 class ContextMenu extends Component {
+  constructor(props) {
+    super(props)
+  }
+
+
   render() {
     if (this.props.visible) {
       return (
@@ -220,7 +232,7 @@ class ContextMenu extends Component {
           style={{top:this.props.x,left:this.props.y}}>
           <p className='context-menu-item' onClick={this._mark} style={{color: '#c41313'}}>close</p>
           <VerticalSeparator color='#ccc' />
-          <p className='context-menu-item' onClick={this._edit}>info</p>
+          <p className='context-menu-item' onClick={() => this.props.open(this.props.visible.target)}>info</p>
           <VerticalSeparator color='#ccc' />
           <p className='context-menu-item delete' onClick={this._delete}>like</p>
         </div>

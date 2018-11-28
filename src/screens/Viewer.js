@@ -1,4 +1,14 @@
 import React, { Component } from 'react';
+import OS from 'opensubtitles-api'
+
+const OpenSubtitles  = new OS({
+  useragent:'test v0.1',
+  username: '',
+  password: '',
+});
+OpenSubtitles.login()
+  .then(res => console.log(res.token))
+  .catch(err => console.error('OS Error: ' + err))
 
 export default class Viewer extends Component {
     constructor(props) {
@@ -7,10 +17,24 @@ export default class Viewer extends Component {
         watch: false,
         trailer: false,
         resolution: this.props.details.torrents[0].quality,
-        url: 'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug,
+        url: 'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug+'/'+this.props.details.imdb_code,
         omdbURL: 'http://www.omdbapi.com/?apikey=3b816127&i='+this.props.details.imdb_code,
         omdbINFO: false,
+        sub: null,
       }
+      this._subtitles()
+    }
+  
+    _subtitles = async () => {
+      OpenSubtitles.search({
+        sublanguageid: 'all',
+        extensions: ['srt', 'vtt'],
+        limit: '3',
+        imdbid: this.props.details.imdb_code,
+        fps: '23.96',
+    }).then(subtitles => {
+        this.setState({sub: subtitles['en'][0].url})
+      })
     }
 
     _omdbAPI = async () => {
@@ -73,7 +97,9 @@ export default class Viewer extends Component {
                       autoPlay
                       controlsList="nodownload"
                       poster={`https://cors-anywhere.herokuapp.com/${this.props.details.background_image}`}
-                      src={this.state.url} />
+                      src={this.state.url}>
+                      <track label="English" kind="subtitles" srcLang="en" src={this.state.sub} default />
+                    </video>
                   : <div className='mov-prev-cnt'>
                       <img className='mov-preview' src={`https://cors-anywhere.herokuapp.com/${this.props.details.background_image}`} alt='' />
                       <img onClick={() => this.setState({watch: true})} className='mov-play' src={require('../resources/img/play.png')} alt='' />

@@ -59,6 +59,7 @@
   right: 10px;
   top: 3px;
   font-size: 12px!important;
+  max-width: 35%;
   cursor: pointer
 }
 .login-btn:hover {
@@ -100,6 +101,9 @@
 }
 .login-form p {
   position: relative;
+  float: right;
+  width: auto;
+  /* max-width: 50%; */
   padding-right: 40px;
   text-align: right;
   cursor: pointer;
@@ -123,6 +127,27 @@
   width: auto;
   text-align: center;
 }
+.u-info {
+  padding-left: 10px;
+  margin: 5px;
+  text-align: left!important;
+  cursor: initial!important
+}
+.u-info:hover {
+  text-shadow: none!important;
+}
+
+.u-panel-tl {
+  padding-left: 10px;
+  margin: 5px;
+  text-align: left!important;
+  font-weight: '200';
+  margin-top: 25px;
+  margin-bottom: 10px;
+  
+
+}
+
 .settings-div {
   display: flex;
   flex-direction: row;
@@ -682,7 +707,7 @@ p.tags-place {
   top: 22px;
   width: 100vw;
   height: calc(100vh - 22px);
-  min-width: 400px;
+  min-width: 320px;
   overflow: hidden;
 }
 
@@ -704,6 +729,7 @@ p.tags-place {
   margin-right: auto;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   top: 0;
   padding-left: 45px;
   /* left: 0; */
@@ -743,7 +769,10 @@ p.tags-place {
   position: relative;
   top: 2px;
   left: 0;
+  right: 0;
   width: 100%;
+  padding: 0;
+  margin: 0;
   height: calc(100vh - 121px);
   overflow-x: hidden;
   overflow-y: scroll;
@@ -769,11 +798,10 @@ p.tags-place {
   position: relative;
   margin: 10px;
   height: auto;
-  /* /* min-height: calc(100vw / 10); */
-  /* max-height: calc(100vw / 8); */
-  /* width: calc(100vw / 7.7); */
-  min-width: calc(100vw / 12);
-  max-width: calc(100vw / 6);
+  min-height: 460px;
+  max-height: 560px;
+  min-width: 290px;
+  max-width: 390px;
   padding: 0px;
   background-color: transparent!important;
   background: no-repeat center;
@@ -886,16 +914,13 @@ p.tags-place {
     width: auto;
     padding-bottom: 0px;
     flex-direction: row;
+    /* flex-wrap: wrap; */
     background-color: #181818!important;
     background: no-repeat center;
     background-size: cover;
-    /* box-shadow: 0 0px 7px #aaa; */
-    /* margin-bottom: 50px; */
     z-index: 1001;
-    /* border-bottom: 1px solid #dadada; */
     overflow: hidden;
     overflow-y: scroll;
-    /* transition: all 200ms ease-in-out; */
 }
 
 .note-view-item .img-poster {
@@ -912,11 +937,6 @@ p.tags-place {
   height: 310px;
   max-height: 310px;
   width: 220px;
-
- 
-  /* margin-bottom: 50px; */
-
-  /* border-bottom: 1px solid #dadada; */
   overflow: hidden;
   /* transition: all 200ms ease-in-out; */
 }
@@ -1055,6 +1075,8 @@ p.tags-place {
   width: 100%;
   display: inline-block;
 }
+
+
 
 .imdb-info {
   position: absolute;
@@ -1215,10 +1237,7 @@ p.tags-place {
   flex-direction: column;
   flex-wrap: wrap;
   top: 70px;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
+  left: 420px;
   width: 360px;
   height: 400px;
   background-color: #262626;
@@ -1260,7 +1279,8 @@ p.tags-place {
   animation-duration: 650ms;
   animation-name: bounce;
 }
-.hypo-loader ~ h3 {
+
+.hypo-loader-text {
   margin-top: 25px;
   font-weight: 200;
   font-size: 25px;
@@ -1291,12 +1311,70 @@ p.tags-place {
 }
 
 
-@media (min-width: 400px) and (max-width: 800px) {
-  .todos {
-    box-shadow: 4px 0px 15px rgba(29,29,29,0.15);
-    border-right: 1px solid #cacaca;
-    transition: all 200ms ease;
+@media (min-width: 300px) and (max-width: 800px) {
+  .notes-header {
+    height: 80px;
   }
+  .notes-header h1 {
+    padding-top: 40px;
+    left: 0;
+    padding-left: 5px!important;
+    margin-left: -37px;
+    font-size: 20px;
+  }
+  .notes-header h2 {
+    margin-top: -30px!important;
+    padding-left: 0px;
+    
+    margin-left: -20px;
+    margin-right: 25px;
+    font-size: 18px;
+  }
+  .hypo-menu {
+    top: 0;
+    height: 40px;
+  }
+  .icon-back {
+    top: 2px;
+    left: 0;
+    width: 42px;
+    
+  }
+  .notes-list {
+    height: calc(100vh - 132px);
+  }
+  .note-list-item {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    margin-bottom: 90px;
+  }
+  .notes-list::-webkit-scrollbar {
+    width: 0px;
+  }
+  .notes-search {
+    right: 52px;
+    bottom: 12px;
+  }
+  .y-info p {
+    margin-top: 390px!important;
+    left: 0!important;
+    width: 100%!important;
+    left: 7px!important;
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
+  }
+  .note-item-header {
+    margin-top: -30px!important;
+  }
+  .mov-prev-cnt {
+    top: 600px!important
+  }
+  .trailer-btn p {
+    margin-top: 15px!important;
+  }
+ 
   /* .notes {
 
     transition: all 200ms ease;

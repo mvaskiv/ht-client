@@ -4,16 +4,13 @@ export default class Poster extends Component {
     constructor(props) {
       super(props)
       this.state = {
-        loading: 1,
-        loaded: false,
-        hash: Date.now()
+        loaded: false
       }
-      this._loader()
     }
   
     _loader = () => {
-      if (this.state.loading) setTimeout(this._loader, 250)
-      else this.forceUpdate();
+      if (this.img.complete) this.setState({loaded: true})
+      else setTimeout(this._loader, 350)
     }
   
     render() {
@@ -26,10 +23,11 @@ export default class Poster extends Component {
           <div
               className='note-list-item'
               onClick={() => props._view(props.num)}>
-              <div className='movie-list-ol'>
+              <div className={'movie-list-ol ' + props.num}>
                 <img src={require('../resources/img/play.png')} alt='' />
               </div>
-              <img src={this.state.loaded ? `https://cors-anywhere.herokuapp.com/${props.details.medium_cover_image}` : require('../resources/img/placeholder.jpg')} onLoad={() => this.setState({loaded: true})} className='img-poster' alt=''/>
+              <img ref={r => this.img = r} src={`https://cors-anywhere.herokuapp.com/${props.details.medium_cover_image}`} onLoad={ this._loader } className='img-poster' alt=''/>
+              <img src={require('../resources/img/placeholder.jpg')} className='img-poster' style={{display: this.state.loaded ? 'none' : 'block'}} alt=''/>
               <p className='note-item-header'>{props.details.title}</p>
               <p className='movie-list-year'>{props.details.year}</p>
               <p className='note-item-text'>{props.details.genres[0] && props.details.genres.map((g,i) => {

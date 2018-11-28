@@ -36,6 +36,7 @@
 		"electron-is-dev": "^0.3.0",
 		"electron-publisher-s3": "^20.17.2",
 		"http": "0.0.0",
+		"opensubtitles-api": "^4.1.0",
 		"pouchdb": "^7.0.0",
 		"pouchdb-find": "^7.0.0",
 		"qrcode.react": "^0.8.0",
