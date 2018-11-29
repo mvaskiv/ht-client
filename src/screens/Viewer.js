@@ -1,14 +1,4 @@
 import React, { Component } from 'react';
-import OS from 'opensubtitles-api'
-
-const OpenSubtitles  = new OS({
-  useragent:'test v0.1',
-  username: '',
-  password: '',
-});
-OpenSubtitles.login()
-  .then(res => console.log(res.token))
-  .catch(err => console.error('OS Error: ' + err))
 
 export default class Viewer extends Component {
     constructor(props) {
@@ -26,15 +16,16 @@ export default class Viewer extends Component {
     }
   
     _subtitles = async () => {
-      OpenSubtitles.search({
-        sublanguageid: 'all',
-        extensions: ['srt', 'vtt'],
-        limit: '3',
-        imdbid: this.props.details.imdb_code,
-        fps: '23.96',
-    }).then(subtitles => {
-        this.setState({sub: subtitles['en'][0].url})
+      await fetch('/sub/'+this.props.details.imdb_code, {
+        method: 'GET',
+        origin: 'Hypotube',
+        headers: {
+          Accept: 'application/json'
+        }
       })
+      .then(r => r.json())
+      .then(res => this.setState({sub: res.sub}))
+      .catch(console.error)
     }
 
     _omdbAPI = async () => {
@@ -46,7 +37,10 @@ export default class Viewer extends Component {
         }
       })
       .then(r => r.json())
-      .then(res => this.setState({omdbINFO: res}))
+      .then(res => {
+        console.log(res)
+        this.setState({omdbINFO: res})
+      })
       console.log(this.state.omdbINFO)
     }
 
@@ -97,7 +91,8 @@ export default class Viewer extends Component {
                       autoPlay
                       controlsList="nodownload"
                       poster={`https://cors-anywhere.herokuapp.com/${this.props.details.background_image}`}
-                      src={this.state.url}>
+                      >
+                      <source type="video/mp4" src={this.state.url} />
                       <track label="English" kind="subtitles" srcLang="en" src={this.state.sub} default />
                     </video>
                   : <div className='mov-prev-cnt'>
