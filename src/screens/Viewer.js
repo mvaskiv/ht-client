@@ -7,7 +7,7 @@ export default class Viewer extends Component {
         watch: false,
         trailer: false,
         resolution: this.props.details.torrents[0].quality,
-        url: 'http://localhost:8000/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug+'/'+this.props.details.imdb_code,
+        url: '/stream/'+this.props.details.torrents[0].hash+'/'+this.props.details.slug+'/'+this.props.details.imdb_code,
         omdbURL: 'http://www.omdbapi.com/?apikey=3b816127&i='+this.props.details.imdb_code,
         omdbINFO: false,
         sub: null,
@@ -139,7 +139,7 @@ export default class Viewer extends Component {
         if (i < 3) return (
           <div className='resolution-button' key={ i } onClick={() => {
             this.setState({resolution: t.quality})
-            this._videoResolution('http://localhost:8000/stream/'+t.hash+'/'+this.props.details.slug)}
+            this._videoResolution('/stream/'+t.hash+'/'+this.props.details.slug)}
           }><p style={{color: this.state.resolution === t.quality ? '#fff' : '#bbb'}}>{t.quality}</p></div>
         )
         else return null
