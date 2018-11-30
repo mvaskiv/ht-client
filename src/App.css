@@ -1186,7 +1186,7 @@ p.tags-place {
 
 .viewer-info {
   /* display: inline-flex; */
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   position: relative;
   margin-left: auto;
@@ -1198,6 +1198,8 @@ p.tags-place {
   min-height: 1200px;
   
   overflow: hidden;
+  overflow-y: scroll;
+  padding-bottom: 300px;
 }
 
 /* .note-view-item {
@@ -1217,6 +1219,93 @@ p.tags-place {
  
   z-index: 201;
 } */
+
+
+
+.likes-com {
+  width: 100vw;
+  position: absolute;
+  top: 885px;
+  min-height: 400px;
+}
+.likes {
+  float: left;
+  color: #aaa
+}
+
+.like {
+  float: left;
+  width: 25px;
+  margin: 8px;
+  cursor: pointer
+}
+
+.comments {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  top: 10px;
+  background-color: #292929;
+  width: 100vw;
+  min-height: 200px;
+  padding-bottom: 80px;
+  height: auto;
+}
+
+.comments p {
+  position: relative;
+  top: 50px;
+  color: #777;
+  margin: 50px;
+}
+.comments input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  padding: 7px;
+  background-color: #444;
+  border: none;
+}
+
+.comment {
+  position: relative;
+  min-height: 80px!important;
+  top: 0px;
+  bottom: 30px;
+  width: 100%!important;
+  padding: 0;
+  margin-bottom: -35px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #777;
+}
+
+.com-u {
+  position: absolute!important;
+  top: 5px!important;
+}
+
+.com-t {
+  position: absolute!important;
+  top: 35px!important;
+  color: #eee!important
+}
+
+.com-send {
+  position: absolute!important;
+  top: 5px!important;
+  right: 30px!important;
+  margin: 0!important;
+  padding: 0!important;
+  cursor: pointer;
+}
+
+.com-send:hover {
+  color: #fff!important
+}
+
+
 
 .icon-back {
   position: absolute;
@@ -1379,6 +1468,7 @@ p.tags-place {
 
     transition: all 200ms ease;
   } */
+
 }
 
 /* REUSABLE */

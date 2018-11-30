@@ -11,10 +11,96 @@ export default class Viewer extends Component {
         omdbURL: 'http://www.omdbapi.com/?apikey=3b816127&i='+this.props.details.imdb_code,
         omdbINFO: false,
         sub: null,
+        comments: false,
+        likes: 0,
+        comText: '',
+        uuid: localStorage.getItem('uuid')
       }
       this._subtitles()
+      this._comments()
+      this._likes()
+    }
+
+    _comments = async () => {
+      await fetch('/comments/'+this.props.details.id, {
+        method: 'GET',
+        origin: 'Hypotube',
+        headers: {
+          Accept: 'application/json'
+        }
+      })
+      .then(r => r.json())
+      .then(res => {
+        console.log(res)
+        if (res.empty) return 
+        else this.setState({comments: res})
+      })
+      .catch(console.error)
+    }
+
+    _likes = async () => {
+      await fetch('/likes/'+this.props.details.id, {
+        method: 'GET',
+        origin: 'Hypotube',
+        headers: {
+          Accept: 'application/json'
+        }
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.empty) return
+        else this.setState({likes: res.length})
+      })
+      .catch(console.error)
+    }
+
+    _postLike = async () => {
+      await fetch('/likes/insert', {
+        method: 'POST',
+        origin: 'Hypotube',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user: this.state.uuid,
+          movie: this.props.details.id,
+          like: true
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        console.log(res)
+        if (res.error) alert('Error, please try again later')
+        else this._likes()
+      })
+      .catch(console.error)
     }
   
+    _postComment = () => {
+      if (this.state.comText) {
+        fetch('/comments/insert', {
+          method: 'POST',
+          origin: 'Hypotube',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user: this.state.uuid,
+            movie: this.props.details.id,
+            comment: this.state.comText
+          })
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res.error) alert('Error, please try again later')
+          else this.setState({comText: ''}, this._comments )
+        })
+        .catch(console.error)
+      }
+    }
+
     _subtitles = async () => {
       await fetch('/sub/'+this.props.details.imdb_code, {
         method: 'GET',
@@ -58,6 +144,18 @@ export default class Viewer extends Component {
         )
         else return null
       })
+
+
+      let Comments = this.state.comments ? this.state.comments.map((c, i) => {
+        return (
+          <div className='comment' key={ i }>
+            <p className='com-u'>{ c.user } wrote:</p>
+            <p className='com-t'>{ c.comment }</p>
+          </div>
+        )
+      }) : null;
+      
+
       return (
         <div className={'note-view-item'}>
           {this.state.trailer && <Trailer id={this.props.details.yt_trailer_code} close={() => this.setState({trailer: false})} />}
@@ -100,6 +198,20 @@ export default class Viewer extends Component {
                       <img onClick={() => this.setState({watch: true})} className='mov-play' src={require('../resources/img/play.png')} alt='' />
                     </div>
                 }
+              </div>
+
+              <div className='likes-com'>
+                <img className='like' onClick={ this._postLike } src={require('../resources/img/like.png')} alt='' />
+                <p className='likes'>{ this.state.likes } Likes</p>
+                
+                <div className='comments'>
+                  <input placeholder='type it in here' ref={ r => this.input = r } type='text' name='comText' onChange={(e) => this.setState({comText: e.target.value})} value={this.state.comText} />
+                  <p className='com-send' onClick={ this._postComment }>submit</p>
+                  { this.state.comments
+                    ? Comments 
+                    : <p>No comments yet</p> 
+                  }
+                </div>
               </div>
               
               {/* <div className='imdb-info'>
